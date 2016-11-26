@@ -1,4 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, abort
+import hashlib
+import hmac
+
 app = Flask(__name__)
 app.config.from_object('config')
 
@@ -10,14 +13,23 @@ def login():
     else:
         return render_template("login.html")
 
-@app.route('/login', methods=['POST'])
-def authenticate():
-    pass
-
-
 @app.route('/auth/shopify/callback', methods=['GET'])
 def callback():
-    pass
+    shop = request.args.get('shop')
+    code = request.args.get('code')
+    given_hmac = request.args.get('hmac')
+
+    #validate the hmac, to make sure we're not being screwed around with
+    h = dict([(key,value) for key, value in request.args.items() if key not in ['hmac','signature']])
+
+    # now sort lexicographically and turn into querystring
+    query = '&'.join(["{0}={1}".format(key, h[key]) for key in sorted(h)])
+
+    # generate the digest
+    digest = hmac.new(app.config['SHOPIFY_APPLICATION_SECRET'], msg=query, digestmod=hashlib.sha256).hexdigest()
+
+    if given_hmac != digest:
+        abort(403, "Authentication failed. Digest provided was: {0}".format(digest))
 
 @app.route('/logout', methods=['GET'])
 def logout():
