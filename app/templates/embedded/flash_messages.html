@@ -1,0 +1,14 @@
+<script type="text/javascript">
+var eventName = typeof(Turbolinks) !== 'undefined' ? 'page:change' : 'DOMContentLoaded';
+
+document.addEventListener(eventName, function() {
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        ShopifyApp.flashNotice("{{message }}");
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+});
+</script>

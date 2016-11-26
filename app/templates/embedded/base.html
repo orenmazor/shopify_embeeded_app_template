@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" />
+    <title>Shopify Embedded Example App</title>
+  </head>
+
+  <body>
+    <div class="app-wrapper">
+      <div class="app-content">
+        <main role="main">
+        {% block content %}
+        {% endblock %}
+        </main>
+      </div>
+    </div>
+
+    {% include "embedded/flash_messages.html" %}
+
+    <script src="https://cdn.shopify.com/s/assets/external/app.js"></script>
+
+    <script type="text/javascript">
+ShopifyApp.init({
+  apiKey: "{{ config['SHOPIFY_APPLICATION_KEY'] }}",
+  debug: false,
+  forceRedirect: true
+});
+    </script>
+
+  </body>
+</html>

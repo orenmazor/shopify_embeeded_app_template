@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, flash
 from models import Shop, db
 import requests
 import json
@@ -39,10 +39,12 @@ def callback():
 
         result = requests.post("https://{}/admin/oauth/access_token".format(shop), data=payload)
 
-        access_token = json.loads(result.text)['access_token']
+        a_shop = Shop.query.filter(Shop.shopify_domain == shop).first()
 
-        new_shop = Shop(shop, access_token)
-        new_shop.Save()
+        if a_shop is None:
+            access_token = json.loads(result.text)['access_token']
+            a_shop = Shop(shop, access_token)
+            a_shop.Save()
 
         return redirect("/")
 
@@ -53,4 +55,5 @@ def logout():
 # actual app logic here
 @app.route('/', methods=['GET'])
 def index():
-    return "hello"
+    flash("Hello world")
+    return render_template("embedded/index.html")
