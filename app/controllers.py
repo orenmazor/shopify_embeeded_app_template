@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, abort
+from models import Shop, db
 import requests
 import json
 import hashlib
@@ -39,6 +40,10 @@ def callback():
         result = requests.post("https://{}/admin/oauth/access_token".format(shop), data=payload)
 
         access_token = json.loads(result.text)['access_token']
+
+        new_shop = Shop(shop, access_token)
+        new_shop.Save()
+
         return redirect("/")
 
 @app.route('/logout', methods=['GET'])
