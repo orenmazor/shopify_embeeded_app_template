@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, abort
+import requests
+import json
 import hashlib
 import hmac
 
@@ -30,8 +32,20 @@ def callback():
 
     if given_hmac != digest:
         abort(403, "Authentication failed. Digest provided was: {0}".format(digest))
+    else:
+        # we're in! get an access token
+        payload = {'client_id': app.config['SHOPIFY_APPLICATION_KEY'],'client_secret': app.config['SHOPIFY_APPLICATION_SECRET'],'code': code}
+
+        result = requests.post("https://{}/admin/oauth/access_token".format(shop), data=payload)
+
+        access_token = json.loads(result.text)['access_token']
+        return redirect("/")
 
 @app.route('/logout', methods=['GET'])
 def logout():
     pass
 
+# actual app logic here
+@app.route('/', methods=['GET'])
+def index():
+    return "hello"
