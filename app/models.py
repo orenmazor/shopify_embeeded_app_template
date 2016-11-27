@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from shopify import Session, ShopifyResource
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shopify_app.db'
@@ -21,3 +22,10 @@ class Shop(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def __enter__(self):
+        session = Session(self.shopify_domain, self.shopify_token)
+        ShopifyResource.activate_session(session)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        ShopifyResource.clear_session()

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, flash, session
 from models import Shop, db
+from shopify import Shop
 import requests
 import json
 import hashlib
@@ -54,14 +55,17 @@ def callback():
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    pass
+    del session["shop_id"]
+    del session["shopify_domain"]
 
 # actual app logic here
 @app.route('/', methods=['GET'])
 def index():
     if session.get("shop_id"):
         current_shop = Shop.query.filter(Shop.id == session.get("shop_id")).first()
-        flash("Hello world")
+        with current_shop:
+            flash("Hello {}".format(Shop.current().shop_owner))
+
         return render_template("embedded/index.html")
     else:
         return redirect("/login")
